@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>基金排行</title></head>
+<body>
+<form method="post" action="/logout"><button type="submit">退出登录</button></form>
+<a href="/crawl">手工采集页面</a>
+<h2>{{ '倒序' if direction=='desc' else '正序' }}基金排行</h2>
+<form method="get">
+  <label>批次</label>
+  <select name="batch_name">
+    {% for b in batches %}
+    <option value="{{ b.batch_name }}" {% if current_batch and b.id==current_batch.id %}selected{% endif %}>{{ b.batch_name }}</option>
+    {% endfor %}
+  </select>
+  <label>行数</label>
+  <select name="page_size">
+    {% for n in page_size_options %}
+    <option value="{{ n }}" {% if page_size==n %}selected{% endif %}>{{ n }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">刷新</button>
+</form>
+
+<h3>当前页面基金持仓股汇总（按持仓市值合计）</h3>
+<table border="1" cellpadding="6">
+  <tr><th>股票代码</th><th>股票名称</th><th>持仓市值合计(万元)</th><th>持股数合计(万股)</th></tr>
+  {% for s in holdings_summary %}
+  <tr><td>{{ s.stock_code }}</td><td>{{ s.stock_name }}</td><td>{{ '%.2f'|format(s.market_value_total or 0) }}</td><td>{{ '%.2f'|format(s.shares_total or 0) }}</td></tr>
+  {% endfor %}
+</table>
+
+<h3>上一期对比汇总排行{% if previous_batch %}（对比 {{ previous_batch.batch_name }}）{% endif %}</h3>
+<table border="1" cellpadding="6">
+  <tr><th>股票代码</th><th>股票名称</th><th>当前市值合计</th><th>上期市值合计</th><th>市值变化额</th><th>当前持股数</th><th>上期持股数</th><th>持股数变化</th><th>变化状态</th></tr>
+  {% for s in compare_summary %}
+  {% set mv = (s.market_value_total or 0) - (s.previous_market_value_total or 0) %}
+  {% set sh = (s.shares_total or 0) - (s.previous_shares_total or 0) %}
+  <tr>
+    <td>{{ s.stock_code }}</td><td>{{ s.stock_name }}</td>
+    <td>{{ '%.2f'|format(s.market_value_total or 0) }}</td>
+    <td>{{ '%.2f'|format(s.previous_market_value_total or 0) }}</td>
+    <td>{{ '%.2f'|format(mv) }}</td>
+    <td>{{ '%.2f'|format(s.shares_total or 0) }}</td>
+    <td>{{ '%.2f'|format(s.previous_shares_total or 0) }}</td>
+    <td>{{ '%.2f'|format(sh) }}</td>
+    <td>{% if mv>0 %}增持{% elif mv<0 %}减持{% else %}持平{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>基金排行（仅6字段）</h3>
+<table border="1" cellpadding="6">
+  <tr><th>排名</th><th>基金代码</th><th>基金名称</th><th>拼音</th><th>净值日期</th><th>单位净值</th><th>今年以来收益</th></tr>
+  {% for r in rank_rows %}
+  <tr>
+    <td>{{ r.rank_no }}</td><td>{{ r.fund_code }}</td><td>{{ r.fund_name }}</td><td>{{ r.fund_name_spell or '' }}</td>
+    <td>{{ r.nav_date or '' }}</td><td>{{ r.unit_nav or '' }}</td><td>{{ r.ytd_return or '' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+</body>
+</html>
