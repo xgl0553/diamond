@@ -1,0 +1,11 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>手工采集</title></head>
+<body>
+<h2>手工采集触发</h2>
+{% if message %}<p>{{ message }}</p>{% endif %}
+<form method="post" action="/crawl">
+  <label>采集名称（xxxx年x季度）</label><input name="batch_name" required>
+  <label>方向</label>
+  <select name="direction"><option value="desc">倒序</option><option value="asc">正序</option></select>
+  <button type="submit">触发采集</button>
+</form>
+</body></html>

@@ -1,0 +1,37 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>用户管理</title></head><body>
+<h2>用户管理</h2>
+<a href="/rankings/desc">返回排行</a> | <a href="/admin/roles">角色管理</a>
+{% if message %}<p>{{ message }}</p>{% endif %}
+
+<h3>新增用户</h3>
+<form method="post" action="/admin/users/create">
+  <input name="username" placeholder="用户名" required>
+  <input name="password" placeholder="初始密码" required>
+  <label><input type="checkbox" name="is_superadmin" value="1">超级管理员</label>
+  <button type="submit">创建</button>
+</form>
+
+<h3>用户列表</h3>
+<table border="1" cellpadding="6">
+<tr><th>ID</th><th>用户名</th><th>状态</th><th>超级管理员</th><th>操作</th></tr>
+{% for u in users %}
+<tr>
+<td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ '启用' if u.is_active else '禁用' }}</td><td>{{ '是' if u.is_superadmin else '否' }}</td>
+<td>
+  <form style="display:inline" method="post" action="/admin/users/{{u.id}}/toggle"><button type="submit">切换启停</button></form>
+  <form style="display:inline" method="post" action="/admin/users/{{u.id}}/reset-password">
+    <input name="new_password" placeholder="新密码" required>
+    <button type="submit">重置密码</button>
+  </form>
+</td>
+</tr>
+{% endfor %}
+</table>
+
+<h3>本人修改密码</h3>
+<form method="post" action="/account/change-password">
+  <input type="password" name="old_password" placeholder="旧密码" required>
+  <input type="password" name="new_password" placeholder="新密码" required>
+  <button type="submit">修改</button>
+</form>
+</body></html>
